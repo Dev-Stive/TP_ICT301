@@ -1,0 +1,339 @@
+\documentclass[a4paper, 11pt]{article}
+
+% --- DÉBUT DU PRÉAMBULE ---
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{xltabular} 
+\usepackage{hyperref}
+\usepackage{tikz} 
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+\definecolor{darkblue}{RGB}{31, 78, 121}
+% --- FIN DU PRÉAMBULE ---
+
+\begin{document}
+
+\section*{1. Identification des Acteurs}
+
+\subsection*{Acteurs Primaires}
+
+\begin{itemize}
+    \item \textbf{Enseignant} : Responsable de la saisie du contenu pédagogique (progression) et de l'émargement numérique des séances.
+    \item \textbf{Étudiant} : Consulte le cahier de texte, suit ses devoirs et accède à son historique d'absences.
+    \item \textbf{Parent} : Accède aux informations relatives à son enfant (cahier de texte, devoirs, absences) et reçoit des notifications.
+    \item \textbf{Administrateur (Scolarité)} : Gère les comptes, les emplois du temps, les classes et les ressources ; traite les litiges et génère les rapports.
+    \item \textbf{Directeur} : Supervise le suivi global de l'établissement ; accède aux rapports stratégiques et aux indicateurs de performance.
+\end{itemize}
+
+\subsection*{Acteurs Secondaires}
+\begin{itemize}
+    \item \textbf{Système d'email :} Interface assurant la communication automatique.
+    \item \textbf{Système de backup :} Garant de la pérennité des données.
+    \item \textbf{Système de logging :} Assure la traçabilité des actions (audit).
+\end{itemize}
+
+\section*{2. Besoins Fonctionnels Spécifiques}
+\begin{enumerate}
+    \item \textbf{Gestion des référentiels et accès} : Gestion sécurisée des comptes utilisateurs (RBAC), des classes, des matières et des salles par l'Administrateur.
+    \item \textbf{Gestion de l'emploi du temps} : Planification dynamique des créneaux, affectation des enseignants et des ressources.
+    \item \textbf{Saisie et suivi des séances} : Horodatage automatique, enregistrement du contenu pédagogique et suivi des absences par l'Enseignant.
+    \item \textbf{Émargement et Validation pédagogique} : Signature numérique des séances et mécanisme de validation croisée par les Délégués de classe.
+    \item \textbf{Espace de consultation (Étudiants/Parents)} : Accès sécurisé au cahier de texte, aux devoirs et à l'historique des absences.
+    \item \textbf{Suivi de progression et Reporting} : Calcul en temps réel du taux d'avancement du programme et extraction de rapports stratégiques (paie, assiduité, couverture pédagogique).
+    \item \textbf{Gestion des alertes et notifications} : Système automatisé d'alerte pour les séances non validées et les absences injustifiées.
+\end{enumerate}
+
+\section*{3. Liste des cas d'utilisation}
+Pour faciliter la lecture, voici le récapitulatif des cas d'utilisation par acteur principal. 
+
+\vspace{0.5cm}
+
+\begin{xltabular}{\textwidth}{|l|X|l|}
+\hline
+\textbf{ID} & \textbf{Nom du Cas d'Utilisation} & \textbf{Acteur Principal} \\ 
+\hline
+\endfirsthead
+
+\hline
+\textbf{ID} & \textbf{Nom du Cas d'Utilisation} & \textbf{Acteur Principal} \\ 
+\hline
+\endhead
+
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+UC-1 & Enregistrer et valider une séance & Enseignant \\ \hline
+UC-2 & Créer une séance de cours & Enseignant \\ \hline
+UC-3 & Gérer les remplacements & Administrateur \\ \hline
+UC-4 & Consulter le cahier de texte (global) & Enseignant \\ \hline
+UC-9 & Consulter le cahier de classe & Étudiant \\ \hline
+UC-10 & Consulter et marquer les devoirs & Étudiant \\ \hline
+UC-11 & Consulter l'historique des absences & Étudiant \\ \hline
+UC-12 & Télécharger les documents de cours & Étudiant \\ \hline
+UC-15 & Consulter le cahier de texte de l'enfant & Parent \\ \hline
+UC-16 & Voir les devoirs de l'enfant & Parent \\ \hline
+UC-17 & Consulter les absences de l'enfant & Parent \\ \hline
+UC-18 & Recevoir notifications/rappels & Parent \\ \hline
+UC-21 & Gérer les utilisateurs & Administrateur \\ \hline
+UC-22 & Gérer les classes et matières & Administrateur \\ \hline
+UC-23 & Arbitrage et validation pédagogique & Administrateur \\ \hline
+UC-25 & Extraction des rapports (Paie/Progression) & Administrateur \\ \hline
+UC-27 & Enregistrer les absences & Administrateur / Enseignant \\ \hline
+UC-30 & Rapports stratégiques & Directeur \\ \hline
+
+\end{xltabular}
+
+\vspace{0.5cm}
+
+\section*{4. Description détaillée des cas d'utilisation}
+
+\subsection*{A. Espace Enseignant}
+
+\begin{itemize}
+    \item \textbf{UC-1 (Enregistrer et valider) :} 
+    Objectif : Officialiser la séance. Acteurs : Enseignant, Délégué. 
+    Scénario : Saisie contenu $\rightarrow$ Signature numérique $\rightarrow$ Notification $\rightarrow$ Validation Délégué.
+    Données : Contenu pédagogique, signature, ID Séance.
+    
+    \item \textbf{UC-2 (Créer séance) :} 
+    Objectif : Planification pédagogique. Acteur : Enseignant.
+    Scénario : Saisie détails (chapitre, points clés) $\rightarrow$ Enregistrement.
+    Données : Date, matières, durée.
+
+    \item \textbf{UC-4 (Consulter cahier global) :} 
+    Objectif : Suivi historique. Acteur : Enseignant.
+    Scénario : Filtrage par date/classe $\rightarrow$ Affichage.
+\end{itemize}
+
+\subsection*{B. Espace Étudiant (Lecture et suivi)}
+
+\begin{itemize}
+    \item \textbf{UC-9 (Consulter cahier classe) :} 
+    Objectif : Accès au contenu. Acteurs : Étudiant, Délégué. 
+    Scénario : Accès interface $\rightarrow$ Consultation en lecture seule.
+    
+    \item \textbf{UC-10 (Gestion devoirs) :} 
+    Objectif : Suivi échéances. Acteur : Étudiant. 
+    Scénario : Sélection section devoirs $\rightarrow$ Changement statut ("à faire" $\rightarrow$ "fait").
+    
+    \item \textbf{UC-11 \& 12 (Absences et Docs) :} 
+    Objectif : Autonomie. Acteur : Étudiant. 
+    Scénario : Visualisation historique absences et téléchargement ressources associées.
+\end{itemize}
+
+\subsection*{C. Espace Parent (Suivi enfant)}
+
+\begin{itemize}
+    \item \textbf{UC-15, 16, 17 (Consultation enfant) :} 
+    Objectif : Transparence. Acteur : Parent. 
+    Scénario : Sélection enfant $\rightarrow$ Visualisation tableaux de bord (Absences/Devoirs).
+    
+    \item \textbf{UC-18 (Notifications) :} 
+    Objectif : Alerte proactive. Acteur : Parent. 
+    Scénario : Déclenchement automatique suite à une absence ou nouveau devoir.
+\end{itemize}
+
+\subsection*{D. Administration et Pilotage}
+
+\begin{itemize}
+    \item \textbf{UC-3 (Gérer remplacements) :} 
+    Objectif : Continuité pédagogique. Acteur : Administrateur. 
+    Scénario : Déclaration indisponibilité $\rightarrow$ Affectation nouveau créneau $\rightarrow$ Notification.
+
+    \item \textbf{UC-21 \& 22 (Gestion Système) :} 
+    Objectif : Maintenance. Acteur : Administrateur. 
+    Scénario : CRUD (Création/Modif/Suppression) comptes et classes.
+
+    \item \textbf{UC-23 (Arbitrage) :} 
+    Objectif : Résolution litige. Acteur : Administrateur. 
+    Scénario : Examen commentaire délégué $\rightarrow$ Validation/Correction.
+
+    \item \textbf{UC-25 \& 27 (Rapports et Absences) :} 
+    Objectif : Suivi administratif. Acteur : Administrateur. 
+    Scénario : Agrégation données $\rightarrow$ Export PDF.
+
+    \item \textbf{UC-30 (Rapports stratégiques) :} 
+    Objectif : Pilotage. Acteur : Directeur. 
+    Scénario : Consultation indicateurs de performance globaux (taux de couverture).
+\end{itemize}
+
+\section*{5. Scénarios critiques}
+
+Cette section décrit les flux d'exécution complexes impliquant plusieurs acteurs et systèmes.
+
+\subsection*{Scénario 1 : Saisie et validation d'une séance (Cycle de vie complet)}
+\textbf{Objectif :} Garantir que chaque heure de cours effectuée est vérifiée et comptabilisée.
+
+\begin{enumerate}
+    \item \textbf{Initialisation :} L'enseignant se connecte et accède à son emploi du temps.
+    \item \textbf{Saisie :} Il enregistre le contenu pédagogique de la séance terminée.
+    \item \textbf{Signature :} Le système génère une empreinte numérique (signature) horodatée.
+    \item \textbf{Notification :} Le système envoie une notification push au délégué de classe.
+    \item \textbf{Validation :} Le délégué vérifie la conformité avec le cours reçu.
+    \begin{itemize}
+        \item \textit{Cas nominal :} Le délégué valide, le compteur d'heures de l'enseignant est incrémenté.
+        \item \textit{Cas de litige :} Le délégué refuse la séance, un champ de commentaire s'ouvre pour motiver le refus.
+    \end{itemize}
+    \item \textbf{Clôture :} L'administrateur est alerté du litige pour arbitrage final (UC-23).
+\end{enumerate}
+
+\subsection*{Scénario 2 : Consultation consolidée par le parent}
+\textbf{Objectif :} Offrir une vue 360° du suivi scolaire de l'élève.
+
+\begin{enumerate}
+    \item \textbf{Authentification :} Le parent se connecte à son portail sécurisé.
+    \item \textbf{Sélection :} Le parent choisit le profil de son enfant (si plusieurs inscrits).
+    \item \textbf{Agrégation :} Le système interroge simultanément les modules :
+    \begin{itemize}
+        \item \textit{Cahier de texte :} Récupération des dernières séances validées.
+        \item \textit{Devoirs :} Filtrage des devoirs en attente (statut "À faire").
+        \item \textit{Absences :} Calcul du taux d'assiduité sur le semestre.
+    \end{itemize}
+    \item \textbf{Affichage :} Le système présente un tableau de bord récapitulatif ("À faire pour demain", "Dernières absences").
+\end{enumerate}
+
+\clearpage
+
+\section*{6. Diagramme UML de cas d'utilisation}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[
+        scale=0.7,
+        transform shape,
+        actor/.style={
+            minimum width=0.5cm,
+            minimum height=1.2cm,
+            font=\small
+        },
+        usecase/.style={
+            ellipse,
+            draw,
+            minimum width=2.5cm,
+            minimum height=0.9cm,
+            align=center,
+            font=\small
+        },
+        system/.style={
+            rectangle,
+            draw,
+            thick,
+            minimum width=18cm,
+            minimum height=20cm
+        },
+        association/.style={-, thick},
+        include/.style={->, dashed, >=stealth},
+        extend/.style={->, dashed, >=stealth},
+        generalization/.style={->, >=open triangle 90, thick}
+    ]
+    
+    % Commande pour dessiner un stick figure avec nom
+    \newcommand{\stickfigure}[3]{
+        % Corps du stick figure
+        \node[circle,fill,inner sep=1.5pt] at (#1,#2) {};
+        \draw (#1,#2) ++(0,-0.15) -- ++(0,-0.4);
+        \draw (#1,#2) ++(0,-0.3) -- ++(-0.15,-0.25);
+        \draw (#1,#2) ++(0,-0.3) -- ++(0.15,-0.25);
+        \draw (#1,#2) ++(0,-0.55) -- ++(-0.15,-0.3);
+        \draw (#1,#2) ++(0,-0.55) -- ++(0.15,-0.3);
+        % Nom en dessous
+        \node[font=\small,below=0.1cm] at (#1,#2-0.9) {#3};
+    }
+    
+    % Acteurs (à gauche avec noms visibles)
+    \stickfigure{-1.5}{12}{Enseignant}
+    \stickfigure{-1.5}{9}{Administrateur}
+    \stickfigure{-1.5}{6}{Directeur}
+    \stickfigure{-1.5}{3}{Étudiant}
+    \stickfigure{-1.5}{0}{Parent}
+    
+    % Système (rectangle principal)
+    \node[system,label={[font=\large]above:\textbf{Système de Gestion Pédagogique}}] (SYS) at (9,6) {};
+    
+    % Cas d'utilisation principaux (colonne gauche)
+    \node[usecase] (UC1) at (5,13) {Enregistrer et\\valider séance};
+    \node[usecase] (UC2) at (5,10.5) {Consulter\\progression\\pédagogique};
+    \node[usecase] (UC3) at (5,8.5) {Gérer les\\remplacements};
+    \node[usecase] (UC4) at (5,6.5) {Extraire\\rapports paie};
+    \node[usecase] (UC9) at (5,4.5) {Consulter\\cahier texte};
+    \node[usecase] (UC10) at (5,2.5) {Gérer ses\\devoirs};
+    \node[usecase] (UC11) at (5,0.5) {Consulter\\absences};
+    
+    % Cas Parent (colonne centre-bas)
+    \node[usecase] (UC15) at (9,2) {Consulter\\infos enfant};
+    \node[usecase] (UC16) at (9,0.5) {Voir devoirs\\enfant};
+    \node[usecase] (UC17) at (9,-1) {Consulter\\absences enfant};
+    \node[usecase] (UC18) at (9,-2.5) {Recevoir\\notifications};
+    
+    % Cas Directeur (nouveau - colonne centre)
+    \node[usecase] (UC30) at (9,6) {Rapports\\stratégiques};
+    
+    % Extensions (colonne centre-droite)
+    \node[usecase] (UC1_Ext) at (11,13) {Gérer litige\\validation};
+    \node[usecase] (UC2_Ext) at (11,10.5) {Signaler retard\\pédagogique};
+    \node[usecase] (UC3_Ext) at (11,8.5) {Traiter conflit\\ressources};
+    \node[usecase] (UC4_Ext) at (11,6.5) {Traiter séances\\non validées};
+    
+    % Inclusions (colonne droite)
+    \node[usecase] (UC_Auth) at (14,10) {S'authentifier};
+    \node[usecase] (UC_Maj) at (14,7) {Mettre à jour\\compteur};
+    
+    % Relations UC1
+    \draw[association] (-1.5,12) -- (UC1);
+    \draw[extend] (UC1_Ext) -- (UC1) node[midway,above,sloped,font=\tiny] {<<extend>>};
+    \draw[include] (UC1) -- (UC_Auth) node[near start,above,sloped,font=\tiny] {<<include>>};
+    \draw[include] (UC1) -- (UC_Maj) node[near start,above,sloped,font=\tiny] {<<include>>};
+    
+    % Relations UC2
+    \draw[association] (-1.5,9) -- (UC2);
+    \draw[association] (-1.5,6) -- (UC2);
+    \draw[extend] (UC2_Ext) -- (UC2) node[midway,above,sloped,font=\tiny] {<<extend>>};
+    \draw[include] (UC2) -- (UC_Auth) node[midway,above,sloped,font=\tiny] {<<include>>};
+    
+    % Relations UC3
+    \draw[association] (-1.5,12) -- (UC3);
+    \draw[association] (-1.5,9) -- (UC3);
+    \draw[association] (-1.5,6) -- (UC3);
+    \draw[extend] (UC3_Ext) -- (UC3) node[midway,above,sloped,font=\tiny] {<<extend>>};
+    \draw[include] (UC3) -- (UC_Auth) node[midway,above,sloped,font=\tiny] {<<include>>};
+    
+    % Relations UC4
+    \draw[association] (-1.5,9) -- (UC4);
+    \draw[association] (-1.5,6) -- (UC4);
+    \draw[extend] (UC4_Ext) -- (UC4) node[midway,above,sloped,font=\tiny] {<<extend>>};
+    \draw[include] (UC4) -- (UC_Auth) node[near start,above,sloped,font=\tiny] {<<include>>};
+    
+    % Relations Directeur vers UC30
+    \draw[association] (-1.5,6) -- (UC30);
+    \draw[include] (UC30) -- (UC_Auth) node[midway,above,sloped,font=\tiny] {<<include>>};
+    
+    % Généralisation : Directeur hérite des droits d'Administrateur
+    \draw[generalization] (-1.5,6) -- (-1.5,9);
+    
+    % Relations Étudiant
+    \draw[association] (-1.5,3) -- (UC9);
+    \draw[association] (-1.5,3) -- (UC10);
+    \draw[association] (-1.5,3) -- (UC11);
+    \draw[include] (UC9) -- (UC_Auth) node[midway,above,sloped,font=\tiny] {<<include>>};
+    \draw[include] (UC10) -- (UC_Auth) node[midway,above,sloped,font=\tiny] {<<include>>};
+    \draw[include] (UC11) -- (UC_Auth) node[midway,above,sloped,font=\tiny] {<<include>>};
+    
+    % Relations Parent
+    \draw[association] (-1.5,0) -- (UC15);
+    \draw[association] (-1.5,0) -- (UC16);
+    \draw[association] (-1.5,0) -- (UC17);
+    \draw[association] (-1.5,0) -- (UC18);
+    \draw[include] (UC15) -- (UC_Auth) node[near start,above,sloped,font=\tiny] {<<include>>};
+    \draw[include] (UC16) -- (UC_Auth) node[near start,above,sloped,font=\tiny] {<<include>>};
+    \draw[include] (UC17) -- (UC_Auth) node[near start,above,sloped,font=\tiny] {<<include>>};
+    
+    \end{tikzpicture}
+    \caption{Diagramme UML des cas d'utilisation du système de gestion pédagogique}
+    \label{fig:use-case-diagram}
+\end{figure}
+
+\end{document}
