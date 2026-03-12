@@ -1,0 +1,565 @@
+
+% ============================================================================
+% BESOINS NON-FONCTIONNELS
+% MOUTENG REBECCA ESTHER - Matricule: 25G2079
+% ============================================================================
+
+\chapter{Exigences Non-Fonctionnelles et Qualité}
+
+\section{Attributs de Qualité}
+
+%\textit{À COMPLÉTER PAR MOUTENG}
+La qualité d'un système logiciel ne se limite pas à sa capacité à réaliser les fonctionnalités attendues. Elle s'évalue
+également à travers un ensemble de propriétés non fonctionnelles
+qui déterminent comment le système se comporte dans son environnement
+réel d'utilisation.
+
+% Consultez le fichier MOUTENG/task.tex pour les ressources complètes
+% Couvrir : Sécurité, Disponibilité, Performance, Maintenabilité, Scalabilité, Usabilité
+
+\subsection{Sécurité}
+
+
+
+La sécurité protège les données pédagogiques et personnelles des utilisateurs.
+
+\begin{description}
+
+    \item[ — Authentification:]
+    Accès par identifiant et mot de passe obligatoire. Mots de passe
+    hachés en \textbf{bcrypt/Argon2} (12 rounds minimum). Compte verrouillé
+    \textbf{30 minutes} après \textbf{5 échecs} consécutifs.\\
+    \textit{Métrique :} 0 mot de passe en clair ;
+    verrouillage après $\leq 5$ tentatives.\\
+    \textit{Justification :} Empêcher l'accès libre et les attaques
+    par force brute.
+
+    \item[ — Contrôle d'accès RBAC:]
+    4 rôles définis : Enseignant, Étudiant, Parent, Administrateur.
+    Un étudiant ne voit que sa classe, un parent que ses enfants,
+    un enseignant ne modifie que ses séances.\\
+    \textit{Métrique :} 0 accès inter-rôle non autorisé ;
+    tentative illégale retourne HTTP \texttt{403}.\\
+    \textit{Justification :} Principe du moindre privilège.
+
+    \item[ — HTTPS obligatoire:]
+    Toutes les communications via \textbf{HTTPS} (TLS 1.2 minimum).
+    MD5 et SHA-1 strictement interdits.\\
+    \textit{Métrique :} 0 endpoint HTTP non chiffré en production.\\
+    \textit{Justification :} Prévenir l'interception des données
+    sur les réseaux du campus.
+
+    \item[ — Journalisation et immuabilité des logs:]
+    Tous les accès et modifications enregistrés (qui, quand, quoi),
+    conservés \textbf{1 an minimum}. Suppression des logs interdite.\\
+    \textit{Métrique :} Couverture 100\% ; logs $\geq 365$ jours ;
+    0 droit \texttt{DELETE}/\texttt{UPDATE} sur la table des logs.\\
+    \textit{Justification :} Garantir la valeur probatoire des journaux
+    en cas d'incident.
+
+\end{description}
+
+\subsection{Disponibilité}
+
+
+Elle garantit que le système est accessible aux utilisateurs
+au moment où ils en ont besoin.
+
+\begin{description}
+
+    \item[ — Uptime minimum garanti:]
+    Le système \textbf{DOIT} être disponible au minimum \textbf{99\%}
+    du temps (max 7,2h de panne/mois), avec monitoring 24/7
+    et alertes automatiques.\\
+    \textit{Métrique :} Uptime mensuel $\geq 99\%$.\\
+    \textit{Justification :} Garantir l'accès pendant les heures
+    d'activité universitaire.
+
+    \item[ — Fenêtres de maintenance contrôlées:]
+    Maintenance programmée le dimanche entre \textbf{22h et 00h}.
+    Patch critique déployé en moins de \textbf{30 minutes}.\\
+    \textit{Métrique :} 100\% des maintenances dans la fenêtre
+    autorisée ; patch critique $\leq 30$ min.\\
+    \textit{Justification :} Minimiser l'impact sur les utilisateurs.
+
+    \item[ — Architecture redondante:]
+    Base de données avec replica en standby (failover automatique).
+    Serveur applicatif sur \textbf{2 instances minimum} derrière
+    un load balancer.\\
+    \textit{Métrique :} Failover $\leq 60$s ;
+    0 point de défaillance unique (SPOF).\\
+    \textit{Justification :} Éviter qu'une panne d'un composant
+    rende le système inaccessible.
+
+    \item[ — Reprise après sinistre:]
+    RTO $\leq$ \textbf{4h}, RPO $\leq$ \textbf{24h}.
+    Backup quotidien stocké hors-site.\\
+    \textit{Métrique :} RTO $\leq 4$h ; RPO $\leq 24$h ;
+    backup quotidien vérifié.\\
+    \textit{Justification :} Protéger les données pédagogiques
+    et assurer une reprise rapide.
+
+\end{description}
+% -----------------------------------------------------------------------
+
+\subsection{Performance}
+
+
+Elle s'assure que le système répond rapidement aux actions des
+utilisateurs.
+
+\begin{description}
+
+    \item[ — Temps de réponse par opération.]
+    Les temps de réponse au \textbf{95\textsuperscript{e} percentile} sont :
+    login $< 1$s, consultation $< 2$s, saisie de séance $< 3$s,
+    génération de rapport $< 10$s.\\
+    \textit{Métrique :} 95\% des requêtes respectent ces seuils
+    (mesuré par monitoring en production).\\
+    \textit{Justification :} Garantir une expérience fluide pour
+    les enseignants et étudiants.
+
+    \item[ — Charge simultanée supportée.]
+    Le système \textbf{DOIT} supporter \textbf{1000 requêtes/minute}
+    et \textbf{500 utilisateurs simultanés} sans dégradation.\\
+    \textit{Métrique :} Temps de réponse maintenus sous 500 utilisateurs
+    simultanés (vérifié par tests de charge).\\
+    \textit{Justification :} Absorber les pics en début et fin de
+    journée universitaire.
+
+    \item[ — Cache multi-niveaux.]
+    Cache navigateur (données statiques : \textbf{1 jour}), cache
+    \textbf{Redis} (données dynamiques : \textbf{1 heure}), index base
+    de données sur colonnes fréquemment requêtées.\\
+    \textit{Métrique :} Taux de cache hit $\geq 70\%$ sur données dynamiques.\\
+    \textit{Justification :} Réduire les appels répétitifs à la
+    base de données.
+
+    \item[ — Ressources serveur maîtrisées.]
+    CPU $\leq 70\%$ et RAM $\leq 80\%$ en charge normale. Tests de
+    performance \textbf{obligatoires} avant tout déploiement.\\
+    \textit{Métrique :} Seuils respectés sous 500 utilisateurs simultanés.\\
+    \textit{Justification :} Maintenir une marge pour absorber
+    les pics inattendus.
+
+\end{description}
+
+
+
+\subsection{Maintenabilité}
+
+
+
+ Garantit que le système peut être facilement compris,
+corrigé et faire l'objet d'évolutions sans effort disproportionné.
+
+\begin{description}
+
+    \item[ — Modularité du code.]
+    Le code \textbf{DOIT} être organisé en modules indépendants, faiblement
+    couplés et fortement cohésifs. Chaque module ne \textbf{DOIT} pas
+    dépasser \textbf{500 lignes} ou \textbf{20 classes}.\\
+    \textit{Métrique :} 0 module dépassant les seuils définis
+    (vérifié par analyse statique du code).\\
+    \textit{Justification :} Faciliter la localisation et la correction
+    des anomalies sans effets de bord.
+
+    \item[ — Documentation.]
+    Le code \textbf{DOIT} être commenté avec un ratio minimum de
+    \textbf{30\% commentaires/code}. L'architecture, les APIs et les
+    procédures de déploiement \textbf{DOIVENT} être documentées
+    (README, Swagger/OpenAPI).\\
+    \textit{Métrique :} Ratio commentaires $\geq 30\%$ ;
+    documentation API à jour à chaque release.\\
+    \textit{Justification :} Permettre à tout nouveau membre de l'équipe
+    de comprendre et modifier le système rapidement.
+
+    \item[ — Couverture de tests.]
+    La couverture minimale par les tests unitaires \textbf{DOIT} être de
+    \textbf{80\%}. Les modules critiques \textbf{DOIVENT} disposer de tests
+    d'intégration. Des tests de performance \textbf{DOIVENT} être exécutés
+    avant chaque déploiement.\\
+    \textit{Métrique :} Couverture tests unitaires $\geq 80\%$
+    (mesuré par outil de couverture de code).\\
+    \textit{Justification :} Détecter les régressions tôt et réduire
+    le risque lors des mises à jour.
+
+    \item[ — Versioning et traçabilité.]
+    Le code source \textbf{DOIT} être géré sous \textbf{Git} avec des
+    commits atomiques et des messages clairs. Le schéma de base de données
+    et les releases \textbf{DOIVENT} suivre le versioning sémantique
+    (\texttt{major.minor.patch}).\\
+    \textit{Métrique :} 100\% du code source sous Git ;
+    0 commit sans message descriptif.\\
+    \textit{Justification :} Permettre le retour arrière rapide en cas
+    de régression et faciliter la collaboration entre développeurs.
+
+\end{description}
+
+\subsection{Scalabilité}
+
+
+
+La scalabilité garantit que le système peut supporter une croissance
+du nombre d'utilisateurs et de données sans modification majeure
+de l'architecture.
+
+\begin{description}
+
+    \item[ — Scalabilité horizontale.]
+    L'architecture \textbf{DOIT} être multi-tiers, stateless et permettre
+    l'ajout de serveurs via un \textbf{load balancer} sans interruption
+    de service.\\
+    \textit{Métrique :} Ajout d'une instance serveur sans downtime ;
+    0 dépendance de session côté serveur.\\
+    \textit{Justification :} Absorber la croissance du nombre d'utilisateurs
+    par simple ajout de machines.
+
+    \item[ — Scalabilité verticale.]
+    La base de données \textbf{DOIT} supporter \textbf{10 000+ séances}
+    avec des performances maintenues grâce aux index et au partitioning.\\
+    \textit{Métrique :} Temps de requête $< 2$s jusqu'à 10 000 séances
+    (vérifié par tests de charge).\\
+    \textit{Justification :} Éviter toute dégradation au fur et à mesure
+    que le volume de données augmente.
+
+    \item[ — Phases de croissance supportées.]
+    Le système \textbf{DOIT} supporter trois phases :
+    \textbf{Phase 1} (100 utilisateurs — pilote),
+    \textbf{Phase 2} (1000 utilisateurs — déploiement complet),
+    \textbf{Phase 3} (10 000 utilisateurs — extension multi-sites).\\
+    \textit{Métrique :} Performances de NFR-PERF-01 respectées
+    à chaque phase.\\
+    \textit{Justification :} Anticiper la croissance progressive
+    à l'échelle de l'université.
+
+    \item[ — Indépendance des composants.]
+    Chaque composant (authentification, cahier de texte, rapports)
+    \textbf{DOIT} pouvoir être mis à l'échelle indépendamment des autres.\\
+    \textit{Métrique :} 0 couplage fort entre composants empêchant
+    un scaling indépendant.\\
+    \textit{Justification :} Optimiser les ressources en ne scalant
+    que les composants sous forte charge.
+
+\end{description}
+
+\subsection{Usabilité}
+
+Elle permet  que le cahier de texte digital est simple et agréable
+à utiliser pour tous les acteurs.
+
+\begin{description}
+
+    \item[ — Interface intuitive.]
+    L'interface \textbf{DOIT} être épurée, avec des menus clairs et des
+    boutons explicitement étiquetés (ex. ``Créer séance'' et non
+    ``Ajouter''). Aucune formation préalable ne doit être nécessaire
+    pour les tâches courantes.\\
+    \textit{Métrique :} Taux de réussite des tâches courantes $\geq 90\%$
+    lors des tests utilisateurs.\\
+    \textit{Justification :} Favoriser l'adoption rapide par les enseignants
+    et personnels administratifs.
+
+    \item[ — Accessibilité.]
+    L'interface \textbf{DOIT} respecter les normes \textbf{WCAG 2.1 niveau AA} :
+    contraste minimum \textbf{4.5:1}, navigation complète au clavier,
+    support des lecteurs d'écran.\\
+    \textit{Métrique :} 0 violation WCAG 2.1 AA
+    (vérifié par outil d'audit d'accessibilité).\\
+    \textit{Justification :} Garantir l'accès au système aux utilisateurs
+    en situation de handicap.
+
+    \item[ — Responsive design.]
+    L'interface \textbf{DOIT} fonctionner correctement sur desktop, tablette
+    et mobile avec les breakpoints : \textbf{320px} (mobile),
+    \textbf{768px} (tablette), \textbf{1024px} (desktop).\\
+    \textit{Métrique :} 0 dysfonctionnement d'affichage sur les trois
+    breakpoints (vérifié par tests multi-supports).\\
+    \textit{Justification :} Permettre aux enseignants de saisir leurs
+    séances depuis n'importe quel appareil.
+
+    \item[ — Localisation.]
+    L'interface \textbf{DOIT} être disponible en \textbf{français}.
+    Une extension vers l'anglais \textbf{DOIT} être possible sans
+    modification de l'architecture.\\
+    \textit{Métrique :} 100\% des libellés en français ; ajout d'une
+    langue sans refactoring du code.\\
+    \textit{Justification :} Répondre au contexte bilingue de
+    l'Université de Yaoundé I.
+
+\end{description}
+
+
+
+\section{Tableau Récapitulatif des Exigences}
+
+
+\begin{table}[H]
+\centering
+\caption{Récapitulatif des Exigences Non-Fonctionnelles}
+\label{tab:nfr}
+\small
+\begin{tabularx}{\textwidth}{|l|X|X|l|}
+\hline
+\textbf{Attribut} & \textbf{Description}
+& \textbf{Métrique} & \textbf{Priorité} \\
+\hline
+
+% --- SÉCURITÉ ---
+Sécurité
+& Authentification, hachage bcrypt/Argon2, verrouillage après 5 échecs
+& 0 mdp en clair ; blocage $\leq 5$ tentatives & Critique \\
+\hline
+Sécurité
+& Contrôle d'accès RBAC (4 rôles)
+& 0 accès inter-rôle non autorisé & Critique \\
+\hline
+Sécurité
+& HTTPS obligatoire (TLS 1.2+)
+& 0 endpoint HTTP non chiffré & Critique \\
+\hline
+Sécurité
+& Journalisation et immuabilité des logs
+& Couverture 100\% ; logs $\geq 365$ jours & Critique \\
+\hline
+
+% --- DISPONIBILITÉ ---
+Disponibilité
+& Uptime minimum garanti
+& Uptime $\geq 99\%$ & Critique \\
+\hline
+Disponibilité
+& Fenêtres de maintenance contrôlées
+& Patch critique $\leq 30$ min & Élevée \\
+\hline
+Disponibilité
+& Architecture redondante
+& Failover $\leq 60$s ; 0 SPOF & Critique \\
+\hline
+Disponibilité
+& Reprise après sinistre
+& RTO $\leq 4$h ; RPO $\leq 24$h & Élevée \\
+\hline
+
+% --- PERFORMANCE ---
+Performance
+& Temps de réponse par opération
+& 95\% requêtes dans les seuils & Élevée \\
+\hline
+Performance
+& Charge simultanée supportée
+& 500 utilisateurs sans dégradation & Élevée \\
+\hline
+Performance
+& Cache multi-niveaux
+& Cache hit $\geq 70\%$ & Moyenne \\
+\hline
+Performance
+& Ressources serveur maîtrisées
+& CPU $\leq 70\%$ ; RAM $\leq 80\%$ & Moyenne \\
+\hline
+
+% --- MAINTENABILITÉ ---
+Maintenabilité
+& Modularité du code
+& 0 module $>$ 500 lignes ou 20 classes & Élevée \\
+\hline
+Maintenabilité
+& Documentation
+& Ratio commentaires $\geq 30\%$ & Élevée \\
+\hline
+Maintenabilité
+& Couverture de tests
+& Tests unitaires $\geq 80\%$ & Élevée \\
+\hline
+Maintenabilité
+& Versioning Git
+& 100\% code sous Git & Moyenne \\
+\hline
+
+% --- SCALABILITÉ ---
+Scalabilité
+& Architecture stateless multi-tiers
+& 0 dépendance session côté serveur & Élevée \\
+\hline
+Scalabilité
+& Base de données optimisée
+& Requêtes $< 2$s jusqu'à 10 000 séances & Élevée \\
+\hline
+Scalabilité
+& Phases de croissance supportées
+& Performances maintenues à chaque phase & Moyenne \\
+\hline
+Scalabilité
+& Indépendance des composants
+& 0 couplage fort entre composants & Moyenne \\
+\hline
+
+% --- USABILITÉ ---
+Usabilité
+& Interface intuitive
+& Taux de réussite tâches $\geq 90\%$ & Élevée \\
+\hline
+Usabilité
+& Accessibilité WCAG 2.1 AA
+& 0 violation WCAG 2.1 AA & Élevée \\
+\hline
+Usabilité
+& Responsive design
+& 0 bug sur les 3 breakpoints & Élevée \\
+\hline
+Usabilité
+& Localisation français/anglais
+& Ajout de langue sans refactoring & Moyenne \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+\section{Contraintes}
+
+La conception du cahier de texte digital ne se limite pas aux seuls attributs de qualité. Elle s'inscrit dans
+un cadre plus large de contraintes qui s'imposent au système
+indépendamment des choix de l'équipe de développement.Elles
+sont de trois natures : technologiques, réglementaires et budgétaires.
+
+\subsection{Contraintes Technologiques}
+
+
+Elles définissent le cadre technique dans lequel
+le système doit être développé et déployé.
+
+\begin{description}
+
+    \item[CT-01 — Langages et frameworks.]
+    Le système \textbf{DOIT} être développé avec des technologies web
+    standard (HTML, CSS, JavaScript) et un framework backend reconnu
+    (ex. Spring Boot, Laravel, Django). L'utilisation de technologies
+    obsolètes est interdite.\\
+    \textit{Justification :} Garantir la maintenabilité et la disponibilité
+    de compétences sur le marché local.
+
+    \item[CT-02 — Base de données.]
+    Le système \textbf{DOIT} utiliser un SGBD relationnel
+    (PostgreSQL ou MySQL). La base \textbf{DOIT} supporter les transactions
+    ACID et les mécanismes de réplication.\\
+    \textit{Justification :} Assurer l'intégrité des données pédagogiques
+    et la disponibilité du système.
+
+    \item[CT-03 — Déploiement.]
+    Le système \textbf{DOIT} être déployable sur un serveur Linux
+    (Ubuntu 20.04+). La conteneurisation via \textbf{Docker} est recommandée
+    pour faciliter les déploiements et la portabilité.\\
+    \textit{Justification :} Réduire les dépendances à un environnement
+    spécifique et simplifier la maintenance.
+
+    \item[CT-04 — Navigateurs supportés.]
+    L'interface \textbf{DOIT} fonctionner sur les versions récentes de
+    Chrome, Firefox, Edge et Safari. Le support d'Internet Explorer
+    est exclu.\\
+    \textit{Justification :} Couvrir l'ensemble des navigateurs utilisés
+    sur le campus de Yaoundé I.
+
+\end{description}
+
+\subsection{Contraintes Réglementaires}
+Elles mettent en avant les obligations légales
+auxquelles le système doit se conformer.
+
+\begin{description}
+
+    \item[CR-01 — Protection des données personnelles.]
+    Le système \textbf{DOIT} respecter les principes du RGPD : collecte
+    minimale des données, consentement explicite, droit d'accès et
+    droit à l'oubli.\\
+    \textit{Justification :} Protéger les données personnelles des
+    étudiants, enseignants et parents conformément aux réglementations
+    en vigueur.
+
+    \item[CR-02 — Confidentialité des données pédagogiques.]
+    Les données pédagogiques (notes, présences, séances) sont
+    confidentielles et ne \textbf{DOIVENT} être accessibles qu'aux
+    personnes autorisées selon leur rôle.\\
+    \textit{Justification :} Respecter le secret professionnel et les
+    règlements intérieurs de l'Université de Yaoundé I.
+
+    \item[CR-03 — Conservation des données.]
+    Les données pédagogiques \textbf{DOIVENT} être conservées au minimum
+    \textbf{5 ans} conformément aux obligations légales des établissements
+    d'enseignement supérieur.\\
+    \textit{Justification :} Permettre la consultation des archives en
+    cas de litige ou de vérification administrative.
+
+\end{description}
+
+
+
+\subsection{Contraintes de Coûts}
+
+ Cette catégorie de besoins non fonctionnels permet de définir  les limites budgétaires dans
+lesquelles le système doit être conçu et maintenu.
+
+\begin{description}
+
+    \item[CC-01 — Technologies open source.]
+    Le système \textbf{DOIT} privilégier les technologies open source
+    (Linux, PostgreSQL, frameworks libres) afin de réduire les
+    coûts de licence.\\
+    \textit{Justification :} Adapter le projet au budget limité d'un
+    établissement universitaire public.
+
+    \item[CC-02 — Hébergement.]
+    Le système \textbf{DOIT} pouvoir être hébergé sur l'infrastructure
+    existante de l'université ou sur un serveur cloud économique
+    (ex. VPS).\\
+    \textit{Justification :} Éviter des investissements matériels
+    importants en phase initiale.
+
+    \item[CC-03 — Maintenance.]
+    Le coût de maintenance annuel \textbf{NE DOIT PAS} dépasser le budget
+    alloué par l'université. La documentation et les tests \textbf{DOIVENT}
+    réduire le temps d'intervention en cas d'anomalie.\\
+    \textit{Justification :} Assurer la pérennité du système sur le long
+    terme sans surcharge budgétaire.
+
+\end{description}
+
+\section{Trade-offs}
+
+
+Les trade-offs identifient les tensions entre exigences qui nécessitent
+des compromis lors de la conception et du développement du système.
+
+\begin{description}
+
+    \item[TF01 — Sécurité vs Performance.]
+    Le chiffrement HTTPS, le hachage bcrypt et la journalisation exhaustive
+    introduisent une latence supplémentaire pouvant impacter les temps de
+    réponse définis.\\
+    \textit{Compromis retenu :} La sécurité est prioritaire. Les performances
+    seront optimisées via le cache pour compenser la latence
+    introduite par le chiffrement.
+
+    \item[TF-02 — Disponibilité vs Coûts.]
+    Une architecture redondante  avec load balancer et replicas
+    de base de données implique des coûts d'infrastructure élevés, en tension
+    avec les contraintes budgétaires.\\
+    \textit{Compromis retenu :} Déploiement progressif — redondance minimale
+    en Phase 1 (pilote), architecture complète en Phase 2 (déploiement full).
+
+    \item[TF-03 — Performance vs Maintenabilité.]
+    L'optimisation poussée des performances 
+    produit un code plus complexe.\\
+    \textit{Compromis retenu :} Optimiser uniquement les modules critiques
+    identifiés par profiling. Le reste du code privilégie la lisibilité.
+
+
+    \item[TF-04 — Sécurité vs Usabilité.]
+    Le verrouillage de compte après 5 échecs  et les restrictions peuvent frustrer les utilisateurs.\\
+    \textit{Compromis retenu :} Mettre en place un mécanisme de déverrouillage
+    par email et des messages d'erreur clairs guidant l'utilisateur sans
+    révéler d'informations sensibles.
+
+\end{description}
+
+\vfill
