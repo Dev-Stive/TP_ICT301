@@ -49,118 +49,144 @@ Pour faciliter la lecture, voici le récapitulatif des cas d'utilisation par act
 
 \vspace{0.5cm}
 
+\section{Liste des cas d'utilisation}
+Pour faciliter la lecture, voici le récapitulatif des cas d'utilisation par acteur principal, incluant les phases d'accès au système.
+
 \begin{xltabular}{\textwidth}{|l|X|l|}
 \hline
-\textbf{ID} & \textbf{Nom du Cas d'Utilisation} & \textbf{Acteur Principal} \\ 
-\hline
+\textbf{ID} & \textbf{Nom du Cas d'Utilisation} & \textbf{Acteur Principal} \\ \hline
 \endfirsthead
-
 \hline
-\textbf{ID} & \textbf{Nom du Cas d'Utilisation} & \textbf{Acteur Principal} \\ 
-\hline
+\textbf{ID} & \textbf{Nom du Cas d'Utilisation} & \textbf{Acteur Principal} \\ \hline
 \endhead
-
 \hline
 \endfoot
-
 \hline
 \endlastfoot
 
-UC-1 & Enregistrer et valider une séance & Enseignant \\ \hline
+% --- ENSEIGNANT ---
+UC-1 & Se connecter & Enseignant \\ \hline
 UC-2 & Créer une séance de cours & Enseignant \\ \hline
-UC-3 & Gérer les remplacements & Administrateur \\ \hline
-UC-4 & Consulter le cahier de texte (global) & Enseignant \\ \hline
-UC-9 & Consulter le cahier de classe & Étudiant \\ \hline
+UC-3 & Modifier une séance (non validée) & Enseignant \\ \hline
+UC-4 & Consulter le cahier de texte & Enseignant \\ \hline
+UC-5 & Créer un devoir & Enseignant \\ \hline
+UC-6 & Consulter les absences des étudiants & Enseignant \\ \hline
+UC-7 & Se déconnecter & Enseignant \\ \hline
+
+% --- ÉTUDIANT ---
+UC-8 & Se connecter & Étudiant \\ \hline
+UC-9 & Consulter le cahier de texte de sa classe & Étudiant \\ \hline
 UC-10 & Consulter et marquer les devoirs & Étudiant \\ \hline
-UC-11 & Consulter l'historique des absences & Étudiant \\ \hline
-UC-12 & Télécharger les documents de cours & Étudiant \\ \hline
+UC-11 & Consulter son historique d'absences & Étudiant \\ \hline
+UC-12 & Télécharger documents (Optionnel) & Étudiant \\ \hline
+UC-13 & Se déconnecter & Étudiant \\ \hline
+
+% --- PARENT ---
+UC-14 & Se connecter & Parent \\ \hline
 UC-15 & Consulter le cahier de texte de l'enfant & Parent \\ \hline
 UC-16 & Voir les devoirs de l'enfant & Parent \\ \hline
 UC-17 & Consulter les absences de l'enfant & Parent \\ \hline
 UC-18 & Recevoir notifications/rappels & Parent \\ \hline
+UC-19 & Se déconnecter & Parent \\ \hline
+
+% --- ADMINISTRATEUR ---
+UC-20 & Se connecter & Administrateur \\ \hline
 UC-21 & Gérer les utilisateurs & Administrateur \\ \hline
 UC-22 & Gérer les classes et matières & Administrateur \\ \hline
-UC-23 & Arbitrage et validation pédagogique & Administrateur \\ \hline
-UC-25 & Extraction des rapports (Paie/Progression) & Administrateur \\ \hline
-UC-27 & Enregistrer les absences & Administrateur / Enseignant \\ \hline
-UC-30 & Rapports stratégiques & Directeur \\ \hline
+UC-23 & Valider les séances de cours & Administrateur \\ \hline
+UC-25 & Générer les rapports (PDF/Excel) & Administrateur \\ \hline
+UC-27 & Enregistrer les absences & Administrateur \\ \hline
+UC-29 & Se déconnecter & Administrateur \\ \hline
+
+% --- DIRECTEUR ---
+UC-30 & Rapports stratégiques (Indicateurs) & Directeur \\ \hline
 
 \end{xltabular}
-
 \vspace{0.5cm}
 
-\section*{4. Description détaillée des cas d'utilisation}
+\section{Description détaillée des cas d'utilisation}
 
 \subsection*{A. Espace Enseignant}
-
 \begin{itemize}
-    \item \textbf{UC-1 (Enregistrer et valider) :} 
-    Objectif : Officialiser la séance. Acteurs : Enseignant, Délégué. 
-    Scénario : Saisie contenu $\rightarrow$ Signature numérique $\rightarrow$ Notification $\rightarrow$ Validation Délégué.
-    Données : Contenu pédagogique, signature, ID Séance.
-    
-    \item \textbf{UC-2 (Créer séance) :} 
-    Objectif : Planification pédagogique. Acteur : Enseignant.
-    Scénario : Saisie détails (chapitre, points clés) $\rightarrow$ Enregistrement.
-    Données : Date, matières, durée.
+    \item \textbf{UC-1 (Se connecter) :} 
+    Objectif : Accéder à l'espace de travail. Acteur : Enseignant.
+    Scénario : Saisie login/MDP $\rightarrow$ Validation système $\rightarrow$ Accès accordé.
+    Précondition : Compte créé par l'Admin.
 
-    \item \textbf{UC-4 (Consulter cahier global) :} 
+    \item \textbf{UC-2 (Créer une séance) :} 
+    Objectif : Enregistrer un nouveau cours. Acteur : Enseignant.
+    Données : Date, horaires, matière, classe, contenu, matériel.
+    Scénario : Clic "Nouvelle séance" $\rightarrow$ Remplissage champs $\rightarrow$ Validation et sauvegarde.
+
+    \item \textbf{UC-3 (Modifier une séance) :} 
+    Objectif : Corriger une saisie. Acteur : Enseignant.
+    Limitation : Uniquement ses propres séances et avant validation par l'administration.
+
+    \item \textbf{UC-4 (Consulter cahier de texte) :} 
     Objectif : Suivi historique. Acteur : Enseignant.
-    Scénario : Filtrage par date/classe $\rightarrow$ Affichage.
+    Filtres : Par date, classe ou matière. Affichage en liste ou calendrier.
+
+    \item \textbf{UC-5 (Créer un devoir) :} 
+    Objectif : Assigner un travail. Acteur : Enseignant.
+    Données : Description, date limite, type de devoir.
+
+    \item \textbf{UC-6 (Consulter absences) :} 
+    Objectif : Suivi de l'assiduité. Acteur : Enseignant.
+    Scénario : Visualisation des étudiants absents lors de ses propres séances.
 \end{itemize}
 
-\subsection*{B. Espace Étudiant (Lecture et suivi)}
-
+\subsection*{B. Espace Étudiant}
 \begin{itemize}
-    \item \textbf{UC-9 (Consulter cahier classe) :} 
-    Objectif : Accès au contenu. Acteurs : Étudiant, Délégué. 
-    Scénario : Accès interface $\rightarrow$ Consultation en lecture seule.
+    \item \textbf{UC-8 (Se connecter) :} Identique à l'enseignant, accès profil étudiant.
     
-    \item \textbf{UC-10 (Gestion devoirs) :} 
-    Objectif : Suivi échéances. Acteur : Étudiant. 
-    Scénario : Sélection section devoirs $\rightarrow$ Changement statut ("à faire" $\rightarrow$ "fait").
+    \item \textbf{UC-9 (Consulter cahier de classe) :} 
+    Objectif : Suivi des cours. Acteur : Étudiant.
+    Contenu : Détails des cours, devoirs assignés et ressources attachées.
     
-    \item \textbf{UC-11 \& 12 (Absences et Docs) :} 
-    Objectif : Autonomie. Acteur : Étudiant. 
-    Scénario : Visualisation historique absences et téléchargement ressources associées.
+    \item \textbf{UC-10 (Voir et gérer les devoirs) :} 
+    Objectif : Organisation du travail. Acteur : Étudiant.
+    Scénario : Consultation liste $\rightarrow$ Marquage ("À faire", "En cours", "Complété").
+    
+    \item \textbf{UC-11 (Historique d'absences) :} 
+    Objectif : Auto-suivi. Acteur : Étudiant.
+    Détails : Liste des absences avec statut (Justifiée ou non).
 \end{itemize}
 
-\subsection*{C. Espace Parent (Suivi enfant)}
-
+\subsection*{C. Espace Parent}
 \begin{itemize}
+    \item \textbf{UC-14 (Se connecter) :} Accès sécurisé au portail parental.
+    
     \item \textbf{UC-15, 16, 17 (Consultation enfant) :} 
-    Objectif : Transparence. Acteur : Parent. 
-    Scénario : Sélection enfant $\rightarrow$ Visualisation tableaux de bord (Absences/Devoirs).
+    Objectif : Suivi de la scolarité de l'enfant. Acteur : Parent.
+    Scénario : Vue lecture seule du cahier de texte, des devoirs et des absences de ses enfants.
     
     \item \textbf{UC-18 (Notifications) :} 
-    Objectif : Alerte proactive. Acteur : Parent. 
-    Scénario : Déclenchement automatique suite à une absence ou nouveau devoir.
+    Objectif : Alerte proactive. Acteur : Parent.
+    Scénario : Envoi automatique d'emails (Nouveau devoir ou absence enregistrée).
 \end{itemize}
 
 \subsection*{D. Administration et Pilotage}
-
 \begin{itemize}
-    \item \textbf{UC-3 (Gérer remplacements) :} 
-    Objectif : Continuité pédagogique. Acteur : Administrateur. 
-    Scénario : Déclaration indisponibilité $\rightarrow$ Affectation nouveau créneau $\rightarrow$ Notification.
+    \item \textbf{UC-21 (Gérer les utilisateurs) :} 
+    Objectif : Administration des comptes. Acteur : Administrateur.
+    Actions : Créer, modifier, désactiver des comptes ou réinitialiser les mots de passe.
 
-    \item \textbf{UC-21 \& 22 (Gestion Système) :} 
-    Objectif : Maintenance. Acteur : Administrateur. 
-    Scénario : CRUD (Création/Modif/Suppression) comptes et classes.
+    \item \textbf{UC-22 (Gérer les classes et matières) :} 
+    Objectif : Structuration pédagogique. Acteur : Administrateur.
+    Actions : Création de classes, affectation des enseignants aux matières.
 
-    \item \textbf{UC-23 (Arbitrage) :} 
-    Objectif : Résolution litige. Acteur : Administrateur. 
-    Scénario : Examen commentaire délégué $\rightarrow$ Validation/Correction.
+    \item \textbf{UC-23 (Valider les séances) :} 
+    Objectif : Contrôle qualité. Acteur : Administrateur.
+    Scénario : Approbation ou rejet des séances saisies par les enseignants. Une fois validée, la séance n'est plus modifiable.
 
-    \item \textbf{UC-25 \& 27 (Rapports et Absences) :} 
-    Objectif : Suivi administratif. Acteur : Administrateur. 
-    Scénario : Agrégation données $\rightarrow$ Export PDF.
+    \item \textbf{UC-25 (Générer rapports) :} 
+    Objectif : Analyse administrative. Acteur : Administrateur.
+    Données : Couverture par enseignant, assiduité par classe. Export PDF/Excel.
 
     \item \textbf{UC-30 (Rapports stratégiques) :} 
-    Objectif : Pilotage. Acteur : Directeur. 
-    Scénario : Consultation indicateurs de performance globaux (taux de couverture).
+    Objectif : Pilotage global. Acteur : Directeur.
+    Indicateurs : Taux de couverture global, enseignants en retard de saisie, statistiques d'absences.
 \end{itemize}
-
 \section*{5. Scénarios critiques}
 
 Cette section décrit les flux d'exécution complexes impliquant plusieurs acteurs et systèmes.
