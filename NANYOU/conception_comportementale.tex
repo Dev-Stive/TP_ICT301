@@ -1,0 +1,190 @@
+\documentclass[a4paper,12pt]{report}
+
+%================================================
+% PACKAGES
+%================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{caption}
+
+% Configuration TikZ pour des diagrammes professionnels
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, shadows, positioning, calc}
+
+% Styles personnalisés pour l'esthétique "Thèse"
+\tikzset{
+    participant/.style={draw, thick, fill=blue!5, rectangle, rounded corners=3pt, inner sep=8pt, font=\small\sffamily\bfseries, drop shadow},
+    actor/.style={draw, thick, fill=gray!10, rectangle, rounded corners=10pt, inner sep=8pt, font=\small\sffamily\bfseries, drop shadow},
+    lifeline/.style={draw, dashed, gray!60, thick},
+    call/.style={->, >=Stealth, thick, font=\footnotesize\sffamily},
+    return/.style={->, >=Stealth, dashed, thick, font=\footnotesize\sffamily},
+    activation/.style={draw, fill=white, thin}
+}
+
+%================================================
+\begin{document}
+
+\chapter{Conception Comportementale -- Dynamique du Système}
+
+\newpage
+
+%================================================
+\section{Vue d'ensemble du Comportement}
+
+Le système repose sur une architecture orientée services où le \textbf{Frontend} communique avec un \textbf{Backend} via une API REST sécurisée par un \textbf{AuthService}. Chaque action critique déclenche un processus de validation métier assuré par différents services applicatifs tels que \textbf{CahierService} ou \textbf{AbsenceService}. Les opérations sont ensuite persistées dans la base de données et toutes les actions sensibles sont enregistrées par un \textbf{AuditService} afin de garantir la traçabilité du système.
+
+Les interactions entre les acteurs et les composants logiciels peuvent être représentées à l’aide de diagrammes de séquence UML. Ces diagrammes permettent de décrire l’ordre chronologique des échanges entre les différentes entités du système.
+
+%================================================
+\section{Scénarios Critiques Détaillés}
+
+%================================================
+\subsection{Scénario 1 : Saisie d'une Séance de Cours}
+
+Dans ce scénario, l’enseignant accède à l’interface de saisie d’une séance de cours. Après avoir rempli les informations nécessaires (matière, contenu pédagogique, date et horaire), le Frontend effectue une première validation des données. La requête est ensuite envoyée au Backend via l’API REST.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=2.5cm, auto]
+    \node[actor] (Ens) {Enseignant};
+    \node[participant, right=of Ens] (Front) {Frontend};
+    \node[participant, right=of Front] (Back) {Backend};
+    \node[participant, right=of Back] (Cahier) {CahierService};
+
+    \foreach \i in {Ens, Front, Back, Cahier} { \draw[lifeline] (\i.south) -- +(0,-4.5cm); }
+
+    \draw[call] ($(Ens.south)+(0,-0.5)$) -- node[above] {Saisir séance} ($(Front.south)+(0,-0.5)$);
+    \draw[call] ($(Front.south)+(0,-1.2)$) -- node[above] {POST /seances} ($(Back.south)+(0,-1.2)$);
+    \draw[call] ($(Back.south)+(0,-1.9)$) -- node[above] {create(data)} ($(Cahier.south)+(0,-1.9)$);
+    \draw[return] ($(Cahier.south)+(0,-2.6)$) -- node[above] {201 Created} ($(Back.south)+(0,-2.6)$);
+    \draw[return] ($(Back.south)+(0,-3.3)$) -- node[above] {Success} ($(Front.south)+(0,-3.3)$);
+    \draw[return] ($(Front.south)+(0,-4.0)$) -- node[above] {Confirmation} ($(Ens.south)+(0,-4.0)$);
+\end{tikzpicture}
+\caption{Diagramme de séquence : Saisie d'une séance de cours}
+\end{figure}
+
+\FloatBarrier
+
+%================================================
+\subsection{Scénario 2 : Consultation du Cahier de Texte}
+
+Dans ce scénario, un étudiant souhaite consulter les séances de cours associées à sa classe. L’étudiant accède à l’interface du cahier de texte via le Frontend. Celui-ci envoie une requête au service applicatif responsable de la gestion du cahier.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=3.5cm, auto]
+    \node[actor] (Etu) {Étudiant};
+    \node[participant, right=of Etu] (Front) {Frontend};
+    \node[participant, right=of Front] (Cahier) {CahierService};
+
+    \foreach \i in {Etu, Front, Cahier} { \draw[lifeline] (\i.south) -- +(0,-3.5cm); }
+
+    \draw[call] ($(Etu.south)+(0,-0.7)$) -- node[above] {Consulter séances} ($(Front.south)+(0,-0.7)$);
+    \draw[call] ($(Front.south)+(0,-1.5)$) -- node[above] {GET /seances} ($(Cahier.south)+(0,-1.5)$);
+    \draw[return] ($(Cahier.south)+(0,-2.3)$) -- node[above] {Liste JSON} ($(Front.south)+(0,-2.3)$);
+    \draw[return] ($(Front.south)+(0,-3.0)$) -- node[above] {Afficher séances} ($(Etu.south)+(0,-3.0)$);
+\end{tikzpicture}
+\caption{Diagramme de séquence : Consultation du cahier de texte}
+\end{figure}
+
+\FloatBarrier
+
+%================================================
+\subsection{Scénario 3 : Validation d'une Séance par l’Administration}
+
+Dans ce scénario, un administrateur consulte la liste des séances en attente de validation. Lorsqu’une séance est validée, le système met à jour son statut et envoie une notification à l’enseignant.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=2.5cm, auto]
+    \node[actor] (Admin) {Administrateur};
+    \node[participant, right=of Admin] (Front) {Frontend};
+    \node[participant, right=of Front] (Cahier) {CahierService};
+    \node[participant, right=of Cahier] (Notif) {Notification};
+
+    \foreach \i in {Admin, Front, Cahier, Notif} { \draw[lifeline] (\i.south) -- +(0,-4cm); }
+
+    \draw[call] ($(Admin.south)+(0,-0.7)$) -- node[above] {Valider séance} ($(Front.south)+(0,-0.7)$);
+    \draw[call] ($(Front.south)+(0,-1.5)$) -- node[above] {POST /validate} ($(Cahier.south)+(0,-1.5)$);
+    \draw[call] ($(Cahier.south)+(0,-2.2)$) -- node[above] {sendNotification()} ($(Notif.south)+(0,-2.2)$);
+    \draw[return] ($(Cahier.south)+(0,-2.9)$) -- node[above] {200 OK} ($(Front.south)+(0,-2.9)$);
+    \draw[return] ($(Front.south)+(0,-3.6)$) -- node[above] {Confirmation} ($(Admin.south)+(0,-3.6)$);
+\end{tikzpicture}
+\caption{Diagramme de séquence : Validation d'une séance}
+\end{figure}
+
+\FloatBarrier
+
+%================================================
+\subsection{Scénario 4 : Consultation des Absences par un Parent}
+
+Le parent accède à son espace personnel. Le système vérifie le lien avec l’élève puis le service des absences récupère les données correspondantes.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=3.5cm, auto]
+    \node[actor] (Parent) {Parent};
+    \node[participant, right=of Parent] (Front) {Frontend};
+    \node[participant, right=of Front] (Abs) {AbsenceService};
+
+    \foreach \i in {Parent, Front, Abs} { \draw[lifeline] (\i.south) -- +(0,-3.5cm); }
+
+    \draw[call] ($(Parent.south)+(0,-0.7)$) -- node[above] {Voir absences} ($(Front.south)+(0,-0.7)$);
+    \draw[call] ($(Front.south)+(0,-1.5)$) -- node[above] {GET /absences} ($(Abs.south)+(0,-1.5)$);
+    \draw[return] ($(Abs.south)+(0,-2.3)$) -- node[above] {Liste JSON} ($(Front.south)+(0,-2.3)$);
+    \draw[return] ($(Front.south)+(0,-3.0)$) -- node[above] {Afficher historique} ($(Parent.south)+(0,-3.0)$);
+\end{tikzpicture}
+\caption{Diagramme de séquence : Consultation des absences}
+\end{figure}
+
+\FloatBarrier
+
+%================================================
+\subsection{Scénario 5 : Génération d'un Rapport Administratif}
+
+Le service de rapport récupère les données nécessaires, effectue les agrégations statistiques et génère un document PDF téléchargeable.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=2.5cm, auto]
+    \node[actor] (Dir) {Directeur};
+    \node[participant, right=of Dir] (Front) {Frontend};
+    \node[participant, right=of Front] (Report) {ReportService};
+    \node[participant, right=of Report] (Repo) {Repository};
+
+    \foreach \i in {Dir, Front, Report, Repo} { \draw[lifeline] (\i.south) -- +(0,-4cm); }
+
+    \draw[call] ($(Dir.south)+(0,-0.7)$) -- node[above] {Générer rapport} ($(Front.south)+(0,-0.7)$);
+    \draw[call] ($(Front.south)+(0,-1.5)$) -- node[above] {GET /reports} ($(Report.south)+(0,-1.5)$);
+    \draw[call] ($(Report.south)+(0,-2.2)$) -- node[above] {fetchData()} ($(Repo.south)+(0,-2.2)$);
+    \draw[return] ($(Report.south)+(0,-2.9)$) -- node[above] {Statistiques} ($(Front.south)+(0,-2.9)$);
+    \draw[return] ($(Front.south)+(0,-3.6)$) -- node[above] {Exporter PDF} ($(Dir.south)+(0,-3.6)$);
+\end{tikzpicture}
+\caption{Diagramme de séquence : Génération d'un rapport}
+\end{figure}
+
+\FloatBarrier
+
+%================================================
+\section{Gestion des Erreurs}
+
+Afin de garantir la robustesse du système, plusieurs mécanismes de gestion des erreurs ont été mis en place :
+
+\begin{itemize}
+\item \textbf{401 Unauthorized} : l’utilisateur n’est pas authentifié.
+\item \textbf{403 Forbidden} : droits insuffisants pour accéder à la ressource.
+\item \textbf{400 Bad Request} : les données envoyées sont invalides.
+\item \textbf{500 Internal Server Error} : erreur interne au niveau du serveur.
+\end{itemize}
+
+\end{document}
