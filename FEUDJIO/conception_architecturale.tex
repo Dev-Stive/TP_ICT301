@@ -1,0 +1,176 @@
+
+% ============================================================================
+% CONCEPTION ARCHITECTURALE - ARCHITECTURE DES COMPOSANTS
+% FEUDJIO TSAGUE LAETICIA - Matricule: 25I2170
+% ============================================================================
+
+
+
+\chapter{Architecture Logicielle - Conception des Composants}
+
+\section{Vue d'ensemble de l'Architecture}
+
+\textit{L'application de gestion scolaire est structurée selon une architecture en couches. 
+Cette architecture permet de séparer les différentes responsabilités du système 
+afin de faciliter la maintenance, la compréhension et l'évolution de l'application. 
+Chaque couche possède un rôle bien défini et communique avec les autres couches 
+à travers des interfaces clairement établies.
+
+La couche de présentation est responsable de l'interaction avec les utilisateurs 
+(enseignants, étudiants, parents et administrateurs). La couche métier contient 
+la logique principale de l'application, notamment la gestion du cahier de texte, 
+des devoirs, des absences et des notifications. Enfin, la couche de persistance 
+assure la gestion et le stockage des données dans la base de données.
+
+Cette organisation modulaire permet de réduire le couplage entre les différents 
+composants du système et d'améliorer la réutilisabilité du code. Elle facilite 
+également l'ajout de nouvelles fonctionnalités sans modifier profondément les 
+parties existantes du système.
+}
+
+% Consultez le fichier FEUDJIO/task.tex pour les ressources complètes
+% Justifier le découpage, principes SOLID appliqués
+
+\section{Vue d'ensemble des responsabilités}
+
+\textit{Il est question ici de présenter les différents composants du système 
+du cahier de texte digital. Chaque composant possède des responsabilités 
+spécifiques et interagit avec les autres composants à travers des interfaces 
+bien définies.}
+
+\subsection{Composant 1 : Authentification}
+
+\textit{Ce composant permet de créer, modifier et supprimer les comptes des différents acteurs du système, tels que les administrateurs, enseignants, élèves et parents. Il gère les rôles et permissions pour contrôler l’accès aux fonctionnalités et assure la cohérence des profils, incluant coordonnées et informations académiques. Les services exposés permettent de récupérer, mettre à jour et assigner des rôles aux utilisateurs, tandis que le composant dépend de la persistance pour le stockage, de l’audit pour tracer les actions, et des notifications pour informer les utilisateurs de changements importants.
+Du point de vue technologique, le composant Authentification peut être implémenté à l'aide d'une API sécurisée permettant 
+de gérer les requêtes de connexion. Des mécanismes tels que les jetons d'authentification (par exemple les JSON Web Tokens) 
+
+}
+
+\subsection{Composant 2 : Gestion des Utilisateurs}
+
+\textit{Ce module permet de créer, modifier et supprimer les comptes des différents acteurs du système, tels que les administrateurs, enseignants, élèves et parents. Il gère les rôles et permissions pour contrôler l’accès aux fonctionnalités et assure la cohérence des profils, incluant coordonnées et informations académiques. Les services exposés permettent de récupérer, mettre à jour et assigner des rôles aux utilisateurs, tandis que le composant dépend de la persistance pour le stockage, de l’audit pour tracer les actions, et des notifications pour informer les utilisateurs de changements importants.
+
+
+}
+
+\subsection{Composant 3 : Gestion de la Structure}
+
+\textit{ ce module est charger organiser la structure pédagogique en modélisant niveaux, classes, filières et années scolaires. Il gère les affectations enseignants-matières-classes ainsi que l’inscription des élèves. Il permet également de paramétrer les emplois du temps. Ses interfaces offrent la création et consul}\textit{tation des classes et des affectations, tandis qu’il interagit avec les services d’utilisateurs pour vérifier l’existence des acteurs et avec l’audit et la persistance pour assurer traçabilité et stockage fiable.}
+
+\subsection{Composant 4 : Cahier de Texte}
+
+\textit{le cahier de texte permet aux enseignants d’enregistrer le contenu des séances, incluant les leçons dispensées et les objectifs pédagogiques, tout en conservant un historique chronologique des cours par classe et matière. Les parents et l’administration peuvent consulter ces informations pour suivre l’activité pédagogique. Ses interfaces offrent l’ajout, la modification, la suppression et la consultation des entrées. Il dépend des services de structure pour valider la cohérence des classes et matières, de la persistance pour le stockage, et de l’audit pour enregistrer les modifications.}
+
+\subsection{Composant 5 : Gestion des Devoirs}
+
+\textit{Ce composant a pour finalité de créer, diffuser et gérer les devoirs et évaluations pour chaque classe et matière. Il enregistre les notes des élèves, calcule les moyennes selon les coefficients et périodes, et génère les bulletins de notes. Les services exposés incluent la création de devoirs, la soumission de notes, le calcul des moyennes et la génération de bulletins. Il interagit avec la persistance pour le stockage, le service de structure pour accéder aux listes d’élèves et de classes, les notifications pour informer les parents, et le service de rapports pour l’analyse des performances.}
+
+\subsection{Composant 6 : Gestion des Absences}
+
+\textit{ Il sera question d'assure dans ce module de gestion des absences l’enregistrement des présences et absences des élèves à chaque séance, en distinguant absences justifiées et injustifiées. Il génère des alertes automatiques aux parents lorsque les seuils d’absences sont dépassés et produit des récapitulatifs d’assiduité par élève et par classe. Les interfaces permettent d’enregistrer la présence, justifier une absence et consulter les rapports d’absentéisme. Il dépend de la persistance pour le stockage, du service de structure pour obtenir les listes d’élèves, des notifications pour avertir les parents, et de l’audit pour tracer les actions.}
+
+\subsection{Composant 7 : Rapports et Statistiques}
+
+\textit{cet eléments  agrège les données issues des autres composants afin de fournir des indicateurs clés et des rapports de pilotage. Il génère des rapports sur l’assiduité, les moyennes par classe, les taux de réussite et propose des exports PDF ou CSV. Les interfaces offrent la génération de rapports, leur export et la consultation de tableaux de bord. Il dépend des services d’absences et de devoirs pour collecter les données, du service de structure pour le contexte organisationnel et de la persistance pour l’accès en lecture aux informations analytiques . }
+
+\subsection{Composant 8 : Persistance}
+
+\textit{Il gère l’accès aux données en implémentant le Repository Pattern pour chaque entité du domaine scolaire. Il fournit les opérations CRUD et assure l’intégrité des données ainsi que la gestion des transactions. Il prend en charge le versioning et la migration de la base de données. Ses interfaces permettent de rechercher, sauvegarder et supprimer des entités telles que les utilisateurs, classes, devoirs ou absences. Il ne dépend d’aucun composant métier et centralise toutes les interactions avec le SGBD, garantissant ainsi un découplage fort entre la logique métier et la persistance.}
+
+\subsection{Composant 9 : Audit et Logging}
+
+\textbf{Responsabilités :}
+
+
+\begin{itemize}
+\item Enregistrer les actions importantes du système.
+\item Assurer la traçabilité des opérations.
+\end{itemize}
+
+\textbf{Interfaces fournies :}
+\begin{itemize}
+\item logAction()
+\item getLogs()
+\end{itemize}
+
+\textbf{Interfaces requises :}
+\begin{itemize}
+\item Persistence
+\end{itemize}
+
+\subsection{Composant 10 : Notifications}
+
+\textit{
+ Gère l’envoi de notifications aux utilisateurs via e-mail, SMS ou notifications in-app, en respectant leurs préférences. Il utilise une file d’attente pour éviter les envois synchrones bloquants et trace le statut de livraison. Les interfaces permettent d’envoyer, planifier et consulter les notifications. Il dépend de la persistance pour archiver les messages, de l’audit pour la traçabilité des envois, et de fournisseurs externes pour les services SMTP et API SMS. Ce composant assure la communication fluide entre le système et ses utilisateurs, tout en restant découplé des composants métier.}
+
+\section{Dépendances et Couplages}
+
+
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{6cm}|p{5cm}|}
+\hline
+\textbf{Composant} & \textbf{Éléments nécessaires pour fonctionner} & \textbf{Provenance (Composant fournisseur)} \\
+\hline
+
+Authentification & 
+Informations d'identification des utilisateurs (login, mot de passe, rôles) &
+Gestion des Utilisateurs \\
+
+\hline
+
+Gestion des Utilisateurs & 
+Services d’authentification pour vérifier l’identité des utilisateurs &
+Authentification \\
+
+\hline
+
+Cahier de Texte & 
+Informations sur les enseignants et les étudiants pour associer les séances de cours &
+Gestion des Utilisateurs \\
+
+\hline
+
+Gestion des Devoirs & 
+Informations sur les séances de cours et les matières afin d’associer les devoirs aux cours &
+Cahier de Texte \\
+
+\hline
+
+Gestion des Absences & 
+Informations sur les séances de cours et la liste des étudiants présents dans une classe &
+Cahier de Texte \\
+
+\hline
+
+Rapports et Statistiques & 
+Données sur les devoirs, les absences et les séances de cours afin de générer des statistiques &
+Gestion des Devoirs, Gestion des Absences, Cahier de Texte \\
+
+\hline
+
+Persistance des Données & 
+Stockage et récupération des données provenant des différents composants du système &
+Tous les composants du système \\
+
+\hline
+\end{tabular}
+\caption{Dépendances fonctionnelles entre les composants du système}
+\label{tab:dependances_composants}
+\end{table}
+ 
+\section{Diagramme de Composants}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{FEUDJIO/image/composanto.drawio.png}
+    \caption{Diagramme de composants}
+    \label{fig:diagramme}
+\end{figure}
+
+%%\section{Patterns Architecturaux}
+
+%%\textit{À COMPLÉTER - Repository Pattern, Service Layer, Observer, etc.}
+
+\vfill
